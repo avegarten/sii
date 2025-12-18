@@ -26,5 +26,8 @@ put '/files/*' do
 
   IO::copy_stream(file, "#{test_dir}/#{dir}")
   # stream files instead File.write
+
+  halt 404 if file.size == 0
+  # basic 404 for now
 end
 
