@@ -29,11 +29,10 @@ put '/files/*' do
   puts init_path
   # for now, testing paths to see whats its giving
 
+  halt 404 if file.size == 0
+  # basic 404 for now
 
   FileUtils.mkdir_p(init_path)
   IO::copy_stream(file, final_dir)
-  
-  halt 404 if file.size == 0
 
-  # basic 404 for now
 end
