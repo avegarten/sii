@@ -5,6 +5,8 @@ require 'json'
 
 #setup/start
 
+# please rename these variables please avery
+
 set :bind, '0.0.0.0'
 set :port, '1100'
 
