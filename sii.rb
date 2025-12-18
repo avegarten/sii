@@ -30,4 +30,3 @@ put '/files/*' do
   halt 404 if file.size == 0
   # basic 404 for now
 end
-
