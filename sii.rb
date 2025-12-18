@@ -15,7 +15,8 @@ init_files_dir = FileUtils.mkdir_p('./files').first
 test_dir = '/home/avery/sii/files'
 
 #upload <local_src> <sii_dest>
-
+#usage curl -X PUT -T /home/avery/Downloads/cat.jpeg http://0.0.0.0:1100/files/images/cat.jpeg
+ 
 put '/files/*' do
   request.body.rewind
 
@@ -24,7 +25,6 @@ put '/files/*' do
   file = request.body
 
   IO::copy_stream(file, "#{test_dir}/#{dir}")
-
-
+  # stream files instead File.write
 end
 
