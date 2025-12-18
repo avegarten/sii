@@ -21,20 +21,24 @@ put '/files/*' do
 
   request.body.rewind
 
-  dir = params['splat'].first
-  file = request.body
+  file_path = params['splat'].first
+  stream = request.body
 
-  final_dir = "#{test_dir}/#{dir}"
-  init_path = File.dirname(final_dir)
+  sii_dest = "#{test_dir}/#{file_path}"
+  parent_dir = File.dirname(sii_dest)
 
-  puts final_dir
-  puts init_path
-  # for now, testing paths to see whats its giving
+  puts sii_dest
+  puts parent_dir
+  # for now, testing paths to see whats coming
+  # /home/avery/sii/files/images/cat.jpeg
+  # /home/avery/sii/files/images
 
-  halt 404 if file.size == 0
+
+
+  halt 404 if stream.size == 0
   # basic 404 for now
 
-  FileUtils.mkdir_p(init_path)
-  IO::copy_stream(file, final_dir)
+  FileUtils.mkdir_p(parent_dir)
+  IO::copy_stream(stream, sii_dest)
 
 end
