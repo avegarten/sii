@@ -24,8 +24,6 @@ sii_dir = File.join(Dir.pwd ,"files")
 
 
 # curl -X PUT -T '/home/avery/Downloads/Claude_Monet_022.jpg'   http://0.0.0.0:1100/files/images/
-
-
 put "/files/*" do
 
 request.body.rewind
@@ -69,14 +67,10 @@ puts_json = {
 }
 
 p puts_json.to_json
-
-
 end
 
 # req to create a folder and directory 
-
 # curl -X POST http://0.0.0.0:1100/files/images/arts/
-
 post '/files/*' do
   request.body.rewind
 
@@ -89,10 +83,20 @@ post '/files/*' do
 
  if Dir.exist?(created_dir) || !post_splat.end_with?("/") 
     status = 409
-    halt 409
+    # halt 409
  elsif post_splat.end_with?("/")
-    FileUtils.mkdir_p(created_dir)
-    status = 201
+  FileUtils.mkdir_p(created_dir)
+  status = 201
+  created_dir_stat = File.stat(created_dir)
+  created_time = created_dir_stat.mtime
+  sii_dest = created_dir if Dir.exist?(created_dir)
   end
-end
 
+  post_mkdir_json = {
+  'status' => status,
+  'sii_dest' => sii_dest,
+  'created_time' => created_time
+  }
+
+  p post_mkdir_json.to_json.to_s
+end
