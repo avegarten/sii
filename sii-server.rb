@@ -23,7 +23,12 @@ init_files_dir = FileUtils.mkdir_p('./files').first
 sii_dir = File.join(Dir.pwd ,"files")
 
 # req to upload a file 
-# curl -X PUT -T '/home/avery/Downloads/Claude_Monet_022.jpg'   http://0.0.0.0:1100/files/images/
+# curl -X PUT -T '/home/avery/Downloads/claude_monet.jpg'   http://0.0.0.0:1100/files/images/
+
+# current issue here, curl -X PUT -T '/home/avery/Downloads/claude_monet.jpg'   http://0.0.0.0:1100/files/images/arts/monet << without trailing "/" will cause an 
+# Errno::EISDIR: Is a directory @ io_fread - /home/avery/sii/files/images/arts/monet (Errno::EISDIR) 
+# but as long as the client send a proper request, this is fine, we can fix this later...
+
 put "/files/*" do
   request.body.rewind
 
@@ -57,15 +62,8 @@ put "/files/*" do
   uploaded_time = sii_file_stat.mtime
   file_size = File.size(sii_final)
 
-  puts_json = {
-    'status' => status,
-    'sii_final' => sii_final,
-    'file_size' => file_size,
-    'file_hash' => file_hash,
-    'uploaded_time' => uploaded_time
-  }
+  p puts_json = {status: status, sii_final: sii_final, file_size: file_size, file_hash: file_hash, uploaded_time: uploaded_time}.to_json
 
-  p puts_json.to_json
 end
 
 # req to create a folder and directory 
@@ -79,10 +77,15 @@ post '/files/*' do
   p "created dir = #{created_dir}"
   p "post_splat = #{post_splat}"
   p "created_dir = #{created_dir}"
+ 
 
- if Dir.exist?(created_dir) || !post_splat.end_with?("/") 
+  if !post_splat.end_with?("/")    
+    status = 400
+    halt 400, {status: status, sii_dest: nil, created_time: nil}.to_json
+  end
+
+  if Dir.exist?(created_dir)
     status = 409
-    # halt 409
   elsif post_splat.end_with?("/")
     FileUtils.mkdir_p(created_dir)
     status = 201
@@ -91,11 +94,11 @@ post '/files/*' do
     sii_dest = created_dir if Dir.exist?(created_dir)
   end
 
-  post_mkdir_json = {
-    'status' => status,
-    'sii_dest' => sii_dest,
-    'created_time' => created_time
-  }
-
-  p post_mkdir_json.to_json.to_s
+  p post_mkdir_json = {status: status, sii_dest: sii_dest, created_time: created_time}.to_json
 end
+
+delete '/files/*' do
+  
+end
+
+
