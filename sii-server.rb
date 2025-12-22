@@ -23,6 +23,9 @@ init_files_dir = FileUtils.mkdir_p('./files').first
 sii_dir = File.join(Dir.pwd ,"files")
 
 
+# curl -X PUT -T '/home/avery/Downloads/Claude_Monet_022.jpg'   http://0.0.0.0:1100/files/images/
+
+
 put "/files/*" do
 
 request.body.rewind
@@ -39,16 +42,16 @@ p "sii_parent: #{sii_parent}"
 
 if stream.size == 0
   halt 400
-  status = status 400
+  status = 400
 end
 
 if File.exist?(sii_final)
-  status = status 200
+  status = 200
 elsif Dir.exist?(sii_parent)
-  status = status 201
+  status = 201
   IO::copy_stream(stream, sii_final)
 else
-  status = status 400
+  status = 400
   halt 400
 end
 
@@ -68,5 +71,28 @@ puts_json = {
 p puts_json.to_json
 
 
+end
+
+# req to create a folder and directory 
+
+# curl -X POST http://0.0.0.0:1100/files/images/arts/
+
+post '/files/*' do
+  request.body.rewind
+
+  post_splat = params['splat'].first
+  created_dir = File.join(sii_dir, post_splat)
+
+  p "created dir = #{created_dir}"
+  p "post_splat = #{post_splat}"
+  p "created_dir = #{created_dir}"
+
+ if Dir.exist?(created_dir) || !post_splat.end_with?("/") 
+    status = 409
+    halt 409
+ elsif post_splat.end_with?("/")
+    FileUtils.mkdir_p(created_dir)
+    status = 201
+  end
 end
 
