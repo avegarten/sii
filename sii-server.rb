@@ -24,12 +24,7 @@ sii_dir = File.join(Dir.pwd ,"files")
 
 # req to upload a file 
 # curl -X PUT -T '/home/avery/Downloads/claude_monet.jpg'   http://0.0.0.0:1100/files/images/
-
-# current issue here, curl -X PUT -T '/home/avery/Downloads/claude_monet.jpg'   http://0.0.0.0:1100/files/images/arts/monet << without trailing "/" will cause an 
-# Errno::EISDIR: Is a directory @ io_fread - /home/avery/sii/files/images/arts/monet (Errno::EISDIR) 
-# but as long as the client send a proper request, this is fine, we can fix this later...
-
-put "/files/*" do
+put '/files/*' do
   request.body.rewind
 
   file_splat = params['splat'].first
@@ -52,18 +47,17 @@ put "/files/*" do
   elsif Dir.exist?(sii_parent)
     status = 201
     IO::copy_stream(stream, sii_final)
+
+    sii_file_stat = File.stat(sii_final)
+    file_hash = Digest::SHA256.file(sii_final).hexdigest
+    uploaded_time = sii_file_stat.mtime
+    file_size = File.size(sii_final)
   else
     status = 400
-    halt 400
+    halt 400, {status: 400, sii_final: nil, file_size: nil, file_hash: nil, uploaded_time: nil}.to_json
   end
 
-  sii_file_stat = File.stat(sii_final)
-  file_hash = Digest::SHA256.file(sii_final).hexdigest
-  uploaded_time = sii_file_stat.mtime
-  file_size = File.size(sii_final)
-
   p puts_json = {status: status, sii_final: sii_final, file_size: file_size, file_hash: file_hash, uploaded_time: uploaded_time}.to_json
-
 end
 
 # req to create a folder and directory 
@@ -97,8 +91,10 @@ post '/files/*' do
   p post_mkdir_json = {status: status, sii_dest: sii_dest, created_time: created_time}.to_json
 end
 
+# req to delete a file or folder
+# curl -X DELETE http://0.0.0.0:1100/files/*
 delete '/files/*' do
-  
+  puts "hello!"
 end
 
 
