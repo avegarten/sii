@@ -48,6 +48,7 @@ put '/files/*' do
 
   if File.exist?(sii_final)
     status = 200
+
   elsif Dir.exist?(sii_parent)
     status = 201
     IO::copy_stream(stream, sii_final)
@@ -56,6 +57,7 @@ put '/files/*' do
     file_hash = Digest::SHA256.file(sii_final).hexdigest
     uploaded_time = sii_file_stat.mtime
     file_size = File.size(sii_final)
+
   else
     status = 400
     halt 400, {status: 400, sii_final: nil, file_size: nil, file_hash: nil, uploaded_time: nil}.to_json
@@ -83,6 +85,7 @@ post '/files/*' do
 
   if Dir.exist?(created_dir)
     status = 409
+
   elsif post_splat.end_with?("/")
     FileUtils.mkdir_p(created_dir)
     status = 201
@@ -116,6 +119,22 @@ delete '/files/*' do
 
   p delete_json = {status: status, delete_path: delete_path}.to_json
 end
+
+# req to get a file 
+# curl -f -J -O http://0.0.0.0:1100/files/* saves to current cd
+get '/files/*' do
+  request.body.rewind
+  
+  get_splat = params['splat'].first
+  get_final = File.join(sii_dir, get_splat)
+
+  if File.exist?(get_final)
+    send_file get_final
+  else
+    halt 404
+  end
+end
+
 
 
 
