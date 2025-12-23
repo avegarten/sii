@@ -34,12 +34,8 @@ put '/files/*' do
   file_splat = params['splat'].first
   stream = request.body
 
-  sii_final = "#{sii_dir}/#{file_splat}"
+  sii_final = File.join(sii_dir, file_splat)
   sii_parent = File.dirname(sii_final)
-
-  p "file_splat: #{file_splat}"
-  p "sii_final: #{sii_final}"
-  p "sii_parent: #{sii_parent}"
 
   if stream.size == 0
     halt 400
@@ -73,10 +69,6 @@ post '/files/*' do
 
   post_splat = params['splat'].first
   created_dir = File.join(sii_dir, post_splat)
-
-  p "created dir = #{created_dir}"
-  p "post_splat = #{post_splat}"
-  p "created_dir = #{created_dir}"
  
   if !post_splat.end_with?("/")    
     status = 400
