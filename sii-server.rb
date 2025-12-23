@@ -22,8 +22,12 @@ set :port, '1100'
 init_files_dir = FileUtils.mkdir_p('./files').first
 sii_dir = File.join(Dir.pwd ,"files")
 
+
 # req to upload a file 
 # curl -X PUT -T '/home/avery/Downloads/claude_monet.jpg'   http://0.0.0.0:1100/files/images/
+
+# still creates an file if the curl requests ends without a trailing "/" 
+# if called the current directory it is put in, please make sure this is fixed or realized in the client?
 put '/files/*' do
   request.body.rewind
 
@@ -72,7 +76,6 @@ post '/files/*' do
   p "post_splat = #{post_splat}"
   p "created_dir = #{created_dir}"
  
-
   if !post_splat.end_with?("/")    
     status = 400
     halt 400, {status: status, sii_dest: nil, created_time: nil}.to_json
@@ -91,10 +94,28 @@ post '/files/*' do
   p post_mkdir_json = {status: status, sii_dest: sii_dest, created_time: created_time}.to_json
 end
 
-# req to delete a file or folder
+# req to delete a file or folder 
 # curl -X DELETE http://0.0.0.0:1100/files/*
 delete '/files/*' do
-  puts "hello!"
+  request.body.rewind
+
+  delete_splat = params['splat'].first
+  delete_path = File.join(sii_dir, delete_splat)
+
+  if delete_splat.empty?
+    puts "empty"
+    status = 403
+
+  elsif File.exist?(delete_path) || Dir.exist?(delete_path)
+    FileUtils.rm_rf(delete_path)
+    status = 200
+
+  else
+    status = 404
+  end
+
+  p delete_json = {status: status, delete_path: delete_path}.to_json
 end
+
 
 
