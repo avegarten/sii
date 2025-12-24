@@ -3,18 +3,6 @@ require 'fileutils'
 require 'digest'
 require 'json'
 
-
-# files testing automation keep this for now
-testing_aut_dir = File.join(Dir.pwd, "files")
-puts "testing - reset /files directory? [y/n]"
-response = gets.chomp.to_s
-if response == "y"
-  FileUtils.rm_rf(testing_aut_dir)
-  puts "done"
-else
-  puts "/files directory kept!"
-end
-
 #setup/start
 set :bind, '0.0.0.0'
 set :port, '1100'
@@ -98,12 +86,11 @@ delete '/files/*' do
   delete_path = File.join(sii_dir, delete_splat)
 
   if delete_splat.empty?
-    puts "empty"
     status = 403
 
   elsif File.exist?(delete_path) || Dir.exist?(delete_path)
-    FileUtils.rm_rf(delete_path)
     status = 200
+    FileUtils.rm_rf(delete_path)
 
   else
     status = 404
